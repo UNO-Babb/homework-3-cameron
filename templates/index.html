@@ -1,61 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexagon Tile Game</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-        #board {
-            display: grid;
-            grid-template-columns: repeat(10, 60px);
-            grid-template-rows: repeat(10, 52px);
-            gap: 2px;
-        }
-        .hex {
-            width: 60px;
-            height: 52px;
-            background-color: lightgray;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            transition: background-color 0.2s;
-        }
-    </style>
+    <title>🍪 Cookie Race</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <h1>🍪 Cookie Race</h1>
+    <h2>Current Turn: {{ game['Turn'] }}</h2>
 
-<div id="board">
-    <!-- Hexagonal tiles will be added here on clicks -->
-</div>
+    {% if 'Wins' in game['Turn'] %}
+    <h3>{{ game['Turn'] }}</h3>
+    <form action="/restart" method="post">
+        <button type="submit">🎉 Restart Game</button>
+    </form>
+    {% else %}
+    <form action="/roll" method="post">
+        <button type="submit">🎲 Roll Dice</button>
+    </form>
+    {% endif %}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Create an empty board of hex tiles
-        for (let i = 0; i < 100; i++) {
-            const hexTile = $('<div class="hex"></div>');
-            hexTile.data("clicked", false);  // Track if a tile has been clicked
-            $('#board').append(hexTile);
-        }
-
-        // Add color to hex tiles on click
-        $('#board').on('click', '.hex', function() {
-            if (!$(this).data("clicked")) {  // Only allow one click per tile
-                $.getJSON('/add_tile', function(data) {
-                    $(this).css('background-color', data.color);
-                    $(this).data("clicked", true);  // Mark as clicked
-                }.bind(this));
-            }
-        });
-    });
-</script>
-
+    <div class="triangle-board">
+        {% for space in range(1, 16) %}
+        <div class="triangle">
+            <div class="number">{{ space }}</div>
+            {% if game['Board'].get(space) %}
+                {% for item in game['Board'][space] %}
+                    {% if "Player" in item %}
+                        <img src="/static/cookie.png" class="cookie" alt="Cookie">
+                    {% else %}
+                        <div class="event">{{ item }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if events.get(space) %}
+                <div class="event">{{ events[space] }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
